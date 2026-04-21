@@ -16,8 +16,10 @@ import {
   CheckCircle2, AlertTriangle, Upload, FileText, X
 } from 'lucide-react';
 import { enhanceNoteInteractive } from '../../lib/gemini';
-import { saveNoteLocally } from '../../lib/db';
+import { useLocation } from 'react-router-dom';
+import { getNoteByTopic, saveNoteLocally } from '../../lib/db';
 import { useStore } from '../../store/useStore';
+import { useEffect } from 'react';
 import './Editor.css';
 
 // ── TOOLBAR BUTTON ─────────────────────────────────────────────────────────
@@ -54,9 +56,13 @@ const Sep = () => <div style={{ width: '1px', height: '22px', background: 'var(-
 
 // ── MAIN EDITOR ────────────────────────────────────────────────────────────
 export default function Editor() {
-  const [topic, setTopic] = useState('');
+  const location = useLocation();
+  const routeState = location.state as { topic?: string } | null;
+
+  const [topic, setTopic] = useState(routeState?.topic || '');
   const [category, setCategory] = useState('');
   const [grandParent, setGrandParent] = useState('');
+  const [noteId, setNoteId] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [savedMsg, setSavedMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -84,6 +90,23 @@ export default function Editor() {
       },
     },
   });
+
+  // Load existing note if topic is provided
+  useEffect(() => {
+    if ((routeState?.topic || topic) && editor) {
+      const load = async () => {
+        const existing = await getNoteByTopic(routeState?.topic || topic);
+        if (existing) {
+          setTopic(existing.topic);
+          setCategory(existing.category);
+          setGrandParent(existing.grandParentCategory);
+          setNoteId(existing.id);
+          editor.commands.setContent(existing.markdownEnhanced);
+        }
+      };
+      load();
+    }
+  }, [editor, routeState?.topic]);
 
   const addLink = () => {
     const url = window.prompt('URL del enlace:');
@@ -156,8 +179,9 @@ export default function Editor() {
     setErrorMsg('');
     const htmlContent = editor.getHTML();
     const textContent = editor.getText();
+    
     await saveNoteLocally({
-      id: crypto.randomUUID(),
+      id: noteId || crypto.randomUUID(),
       topic,
       category: category || 'General',
       grandParentCategory: grandParent || 'Sin clasificar',
@@ -165,8 +189,9 @@ export default function Editor() {
       markdownEnhanced: htmlContent,
       timestamp: Date.now()
     });
+    
     updateNodeProgress(topic, 25, 25, category || 'General', grandParent || 'Sin clasificar');
-    setSavedMsg('¡Guardado en tu Árbol de Conocimiento!');
+    setSavedMsg('¡Nota guardada y sincronizada!');
     setTimeout(() => setSavedMsg(''), 4000);
   };
 
