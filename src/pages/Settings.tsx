@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { saveProfileLocally, type Profile } from '../lib/db';
-import { ShieldAlert, Key, Check, CheckCircle2, User } from 'lucide-react';
+import { ShieldAlert, Key, Check, CheckCircle2, User, LogIn, LogOut, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { auth, googleProvider } from '../lib/firebase';
+import { signInWithPopup, signOut } from 'firebase/auth';
 
 export default function SettingsPage() {
-  const { apiKey, setApiKey, profile, setProfile } = useStore();
+  const { apiKey, setApiKey, profile, setProfile, user, isSyncing, lastSync, syncToCloud } = useStore();
   const [inputValue, setInputValue] = useState(apiKey || '');
   const [saved, setSaved] = useState(false);
   const [isEditing, setIsEditing] = useState(!apiKey);
@@ -37,11 +39,91 @@ export default function SettingsPage() {
     setTimeout(() => setProfileSaved(false), 2000);
   };
 
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '800px', paddingBottom: '60px' }}>
       <div>
         <h2 style={{ fontSize: '32px', marginBottom: '8px' }}>Configuración y Perfil</h2>
         <p style={{ color: 'var(--text-secondary)' }}>Ajusta las preferencias de tu sistema Esteban Learning y tu Perfil Personal.</p>
+      </div>
+
+      {/* SECCIÓN DE CUENTA (FIREBASE) */}
+      <div className="glass" style={{ padding: '24px', border: '1px solid rgba(66, 133, 244, 0.3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Cloud size={24} color="var(--accent-blue)" />
+            <h3 style={{ fontSize: '20px' }}>Sincronización en la Nube</h3>
+          </div>
+          {user && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+              {isSyncing ? <RefreshCw size={14} className="spin" /> : <Check size={14} color="var(--accent-green)" />}
+              {isSyncing ? 'Sincronizando...' : lastSync ? `Última sincronización: ${new Date(lastSync).toLocaleTimeString()}` : 'List para sincronizar'}
+            </div>
+          )}
+        </div>
+
+        {!user ? (
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+              Inicia sesión con Google para guardar tu progreso, nodos aprendidos y XP en la nube de forma segura.
+            </p>
+            <button 
+              onClick={handleLogin}
+              style={{
+                background: 'white',
+                color: '#444',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+              }}
+            >
+              <LogIn size={20} color="#4285F4" />
+              Continuar con Google
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px' }}>
+            <img src={user.photoURL || ''} alt="avatar" style={{ width: '60px', height: '60px', borderRadius: '50%', border: '2px solid var(--accent-blue)' }} />
+            <div style={{ flex: 1 }}>
+              <h4 style={{ fontSize: '18px', fontWeight: 600 }}>{user.displayName}</h4>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>{user.email}</p>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                <button 
+                  onClick={() => syncToCloud()}
+                  disabled={isSyncing}
+                  style={{ background: 'transparent', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <RefreshCw size={14} className={isSyncing ? "spin" : ""} /> Forzar Sync
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  style={{ background: 'transparent', border: '1px solid #ff4d4d', color: '#ff4d4d', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <LogOut size={14} /> Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="glass" style={{ padding: '24px' }}>

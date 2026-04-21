@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { BookOpen, TreePine, Wrench, Settings, Menu, Brain, BarChart2 } from 'lucide-react';
+import { BookOpen, TreePine, Wrench, Settings, Menu, Brain, BarChart2, Cloud, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Dashboard from './pages/Dashboard';
 import KnowledgeTree from './pages/KnowledgeTree';
@@ -15,7 +15,7 @@ import './index.css';
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
-  const { theme, setProfile } = useStore();
+  const { theme, setProfile, user, isSyncing } = useStore();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -52,7 +52,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <h1 style={{ fontSize: '22px', margin: 0, whiteSpace: 'nowrap' }} className="text-gradient">Esteban Learning</h1>
             </div>
 
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '200px' }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '200px', flex: 1 }}>
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
                 return (
@@ -69,10 +69,25 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               })}
             </nav>
 
-            {/* Bottom hint */}
-            <div style={{ marginTop: 'auto', padding: '12px', borderRadius: '8px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                🌐 App pública en GitHub Pages
+            {/* User & Cloud Status */}
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {user && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <img src={user.photoURL || ''} alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.displayName}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {isSyncing ? <RefreshCw size={10} className="spin" /> : <Cloud size={10} color="var(--accent-blue)" />}
+                      {isSyncing ? 'Sincronizando' : 'Nube activa'}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(99,102,241,0.05)', textAlign: 'center' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                  🌐 {user ? 'Sincronizado' : 'Modo Invitado'}
+                </div>
               </div>
             </div>
           </motion.aside>

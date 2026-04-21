@@ -27,6 +27,7 @@
     "@tiptap/react": "^3.22.4",
     "@tiptap/starter-kit": "^3.22.4",
     "canvas-confetti": "^1.9.4",
+    "firebase": "^12.12.1",
     "framer-motion": "^12.38.0",
     "idb": "^8.0.3",
     "katex": "^0.16.45",
