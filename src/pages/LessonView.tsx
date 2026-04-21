@@ -1,21 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
-import { Loader2, XCircle, ChevronRight, GraduationCap, RefreshCw, AlertTriangle, FileText, Clock, WifiOff, Key } from 'lucide-react';
+import { Loader2, XCircle, ChevronRight, GraduationCap, RefreshCw, AlertTriangle, FileText, Clock, WifiOff, Key, CheckCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { saveLessonLocally, getLessonLocally, getContextBlocksForAI, type Slide } from '../lib/db';
-import { CheckCircle } from 'lucide-react';
+import { callGemini, GeminiError } from '../lib/gemini';
 
 mermaid.initialize({ startOnLoad: false, theme: 'dark' });
 
-const MODEL_FALLBACK = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
 
 const MermaidDiagram = ({ chart }: { chart: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -205,40 +203,19 @@ export default function LessonView() {
         ]
       `;
 
-      // Try each model in fallback chain
-      let succeeded = false;
-      for (const modelName of MODEL_FALLBACK) {
-        try {
-          const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({ model: modelName });
-          const result = await model.generateContent(prompt);
-          const text = result.response.text().trim();
-          const match = text.match(/\[[\s\S]*\]/);
-          const parsed: Slide[] = JSON.parse(match ? match[0] : text);
-          setSlides(parsed);
-          await saveLessonLocally(topic!, parsed);
-          succeeded = true;
-          break;
-        } catch (e) {
-          const msg = (e instanceof Error ? e.message : String(e)).toLowerCase();
-          if (msg.includes('429') || msg.includes('quota')) {
-            setErrorCode('QUOTA_EXCEEDED'); break;
-          }
-          if (msg.includes('503') || msg.includes('overloaded') || msg.includes('high demand')) {
-            // try next model
-            continue;
-          }
-          if (msg.includes('404') || msg.includes('not found')) {
-            continue; // try next model
-          }
-          // Generic error — try next model
-          if (MODEL_FALLBACK.indexOf(modelName) === MODEL_FALLBACK.length - 1) {
-            setErrorCode('UNKNOWN');
-          }
+      try {
+        const text = await callGemini(apiKey, prompt);
+        const match = text.match(/\[[\s\S]*\]/);
+        const parsed: Slide[] = JSON.parse(match ? match[0] : text);
+        setSlides(parsed);
+        await saveLessonLocally(topic!, parsed);
+      } catch (e: unknown) {
+        if (e instanceof GeminiError) {
+          setErrorCode(e.code as any);
+        } else {
+          setErrorCode('UNKNOWN');
         }
       }
-
-      if (!succeeded && !errorCode) setErrorCode('UNKNOWN');
       setLoading(false);
     }
 
@@ -268,16 +245,13 @@ export default function LessonView() {
     if (!apiKey) return;
     setRemedialLoading(true);
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: MODEL_FALLBACK[0] });
       const prompt = `
         El estudiante respondió incorrectamente.
         Pregunta: "${slide.question}". Correcta: "${slide.correct}". Él eligió: "${wrongAns}".
         Genera UN slide JSON de teoría "Módulo de Refuerzo" explicando pacientemente por qué se equivocó.
         Formato JSON: { "type": "theory", "content": "Explicación..." }
       `;
-      const result = await model.generateContent(prompt);
-      const text = result.response.text().trim();
+      const text = await callGemini(apiKey, prompt);
       const match = text.match(/\{[\s\S]*\}/);
       const newSlide: Slide = JSON.parse(match ? match[0] : text);
       if (newSlide.type === 'theory') {

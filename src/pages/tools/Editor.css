@@ -1,0 +1,123 @@
+/* TipTap Editor Styles */
+.tiptap-editor {
+  flex: 1;
+  padding: 20px 24px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-primary);
+  min-height: 400px;
+  font-family: 'Inter', sans-serif;
+}
+
+.tiptap-editor h1 { font-size: 2em; font-weight: 700; margin: 1em 0 0.5em; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
+.tiptap-editor h2 { font-size: 1.5em; font-weight: 600; margin: 0.8em 0 0.4em; color: var(--text-primary); }
+.tiptap-editor h3 { font-size: 1.2em; font-weight: 600; margin: 0.6em 0 0.3em; color: var(--text-secondary); }
+
+.tiptap-editor p { margin: 0.4em 0; }
+.tiptap-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--text-muted);
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap-editor strong { color: white; font-weight: 700; }
+.tiptap-editor em { color: var(--text-secondary); font-style: italic; }
+.tiptap-editor s { text-decoration: line-through; color: var(--text-muted); }
+.tiptap-editor mark { background: rgba(251,191,36,0.25); color: #fbbf24; border-radius: 3px; padding: 0 3px; }
+
+.tiptap-editor code {
+  background: rgba(0,0,0,0.4);
+  color: #a5f3fc;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 13px;
+}
+
+.tiptap-editor pre {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+.tiptap-editor pre code {
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  color: #a5f3fc;
+}
+
+.tiptap-editor blockquote {
+  border-left: 3px solid var(--accent-blue);
+  margin: 8px 0;
+  padding-left: 16px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.tiptap-editor hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 16px 0;
+}
+
+.tiptap-editor ul, .tiptap-editor ol {
+  padding-left: 24px;
+  margin: 6px 0;
+}
+.tiptap-editor li { margin: 3px 0; }
+.tiptap-editor li p { margin: 0; }
+
+/* Task list */
+.tiptap-editor ul[data-type="taskList"] { list-style: none; padding-left: 8px; }
+.tiptap-editor ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 8px; }
+.tiptap-editor ul[data-type="taskList"] li > label { margin-top: 3px; }
+.tiptap-editor ul[data-type="taskList"] li > label input { width: 16px; height: 16px; accent-color: var(--accent-blue); cursor: pointer; }
+.tiptap-editor ul[data-type="taskList"] li > div { flex: 1; }
+
+/* Table */
+.tiptap-editor table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.tiptap-editor th, .tiptap-editor td {
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  min-width: 80px;
+  text-align: left;
+}
+.tiptap-editor th {
+  background: rgba(99,102,241,0.15);
+  font-weight: 600;
+  color: var(--accent-blue);
+}
+.tiptap-editor td { background: rgba(0,0,0,0.2); }
+.tiptap-editor tr:hover td { background: rgba(255,255,255,0.04); }
+.tiptap-editor .selectedCell { background: rgba(99,102,241,0.2) !important; }
+
+/* Links */
+.tiptap-editor a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.tiptap-editor a:hover { opacity: 0.8; }
+
+/* Images */
+.tiptap-editor img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 8px 0;
+  display: block;
+}
+
+/* Selection */
+.tiptap-editor ::selection { background: rgba(99,102,241,0.35); }
