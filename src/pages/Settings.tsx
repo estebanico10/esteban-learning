@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { saveProfileLocally, type Profile } from '../lib/db';
-import { ShieldAlert, Key, Check, CheckCircle2, User, LogIn, LogOut, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Key, Check, CheckCircle2, User, LogIn, LogOut, Cloud, RefreshCw } from 'lucide-react';
 import { auth, googleProvider } from '../lib/firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 
