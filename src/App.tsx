@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { BookOpen, TreePine, Wrench, Settings, Menu, Brain } from 'lucide-react';
+import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BookOpen, TreePine, Wrench, Settings, Menu, Brain, BarChart2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Dashboard from './pages/Dashboard';
 import KnowledgeTree from './pages/KnowledgeTree';
 import Tools from './pages/Tools';
 import SettingsPage from './pages/Settings';
 import LessonView from './pages/LessonView';
+import Analytics from './pages/Analytics';
 import { useStore } from './store/useStore';
 import { getProfileLocally } from './lib/db';
 import './index.css';
@@ -27,6 +28,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Inicio', path: '/', icon: <BookOpen size={20} /> },
     { name: 'Mapa de Nodos', path: '/tree', icon: <TreePine size={20} /> },
     { name: 'Herramientas', path: '/tools', icon: <Wrench size={20} /> },
+    { name: 'Métricas', path: '/analytics', icon: <BarChart2 size={20} /> },
     { name: 'Configuración', path: '/settings', icon: <Settings size={20} /> },
   ];
 
@@ -47,7 +49,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <div style={{ background: 'var(--accent-gradient)', padding: '8px', borderRadius: '8px' }}>
                 <Brain size={24} color="white" />
               </div>
-              <h1 style={{ fontSize: '24px', margin: 0, whiteSpace: 'nowrap' }} className="text-gradient">Esteban Learning</h1>
+              <h1 style={{ fontSize: '22px', margin: 0, whiteSpace: 'nowrap' }} className="text-gradient">Esteban Learning</h1>
             </div>
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '200px' }}>
@@ -56,7 +58,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                 return (
                   <Link 
                     key={item.path} to={item.path}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: 'var(--radius-md)', color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)', background: isActive ? 'var(--bg-panel-hover)' : 'transparent', fontWeight: isActive ? 500 : 400, transition: 'all var(--transition-fast)' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: 'var(--radius-md)', color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)', background: isActive ? 'var(--bg-panel-hover)' : 'transparent', fontWeight: isActive ? 500 : 400, transition: 'all var(--transition-fast)', textDecoration: 'none' }}
                     onMouseEnter={(e) => { if(!isActive) e.currentTarget.style.color = 'var(--text-primary)'; }}
                     onMouseLeave={(e) => { if(!isActive) e.currentTarget.style.color = 'var(--text-secondary)'; }}
                   >
@@ -66,6 +68,13 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                 )
               })}
             </nav>
+
+            {/* Bottom hint */}
+            <div style={{ marginTop: 'auto', padding: '12px', borderRadius: '8px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                🌐 App pública en GitHub Pages
+              </div>
+            </div>
           </motion.aside>
         )}
       </AnimatePresence>
@@ -99,6 +108,7 @@ function App() {
           <Route path="/tree" element={<KnowledgeTree />} />
           <Route path="/lesson/:topic" element={<LessonView />} />
           <Route path="/tools/*" element={<Tools />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </AppLayout>
