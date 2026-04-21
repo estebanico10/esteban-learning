@@ -8,6 +8,8 @@ const MODEL_CHAIN = [
   'gemini-1.5-pro',
 ];
 
+export const GEMINI_LIB_VERSION = '2.1.0'; // Para verificar actualización en consola
+
 export class GeminiError extends Error {
   code: 'NO_KEY' | 'QUOTA_EXCEEDED' | 'OVERLOADED' | 'NOT_FOUND' | 'UNKNOWN';
   constructor(message: string, code: 'NO_KEY' | 'QUOTA_EXCEEDED' | 'OVERLOADED' | 'NOT_FOUND' | 'UNKNOWN') {
@@ -39,7 +41,7 @@ export async function callGemini(apiKey: string, prompt: string): Promise<string
       const msg = e instanceof Error ? e.message : String(e);
       lastErr = msg;
       lastCode = classifyMsg(msg);
-      console.warn(`[Gemini] model=${modelName} error:`, lastCode, msg.substring(0, 120));
+      console.warn(`[Gemini v${GEMINI_LIB_VERSION}] model=${modelName} error:`, lastCode, msg.substring(0, 120));
       // For quota exceeded, try next model anyway (different models have separate quotas)
       // For unknown errors also try next model
       // Only stop if all models fail

@@ -294,9 +294,21 @@ export default function LessonView() {
   );
 
   // ── SLIDES ────────────────────────────────────────────────────────────────
+  // ── EMPTY STATE ──────────────────────────────────────────────────────────
+  if (!loading && (!slides || slides.length === 0) && !errorCode) return (
+    <div style={{ textAlign: 'center', marginTop: '60px', padding: '40px' }}>
+      <AlertTriangle size={48} color="var(--accent-blue)" style={{ marginBottom: '20px' }} />
+      <h2>No se pudo cargar la lección</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>Hubo un problema al generar el contenido con la IA o el formato es inválido.</p>
+      <button onClick={() => navigate('/tree')} style={btnStyle('var(--accent-gradient)')}>Volver al Árbol</button>
+    </div>
+  );
+
   const slide = slides[currentSlideIndex];
-  const isLast = currentSlideIndex === slides.length - 1;
-  const progressPct = slides.length > 0 ? (currentSlideIndex / slides.length) * 100 : 0;
+  if (!slide && !loading && !errorCode) return null;
+
+  const isLast = currentSlideIndex === (slides?.length || 1) - 1;
+  const progressPct = slides?.length > 0 ? (currentSlideIndex / slides.length) * 100 : 0;
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', minHeight: '80vh', paddingBottom: '60px' }}>
